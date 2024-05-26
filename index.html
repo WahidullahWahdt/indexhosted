@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Audio Broadcast</title>
+</head>
+<body>
+  <h1>Live Audio Broadcast</h1>
+  <audio id="liveAudio" controls autoplay></audio>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const liveAudioElement = document.getElementById('liveAudio');
+    let lastAudioData = null;
+
+    socket.on('live-audio', (audioData) => {
+      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
+      liveAudioElement.src = URL.createObjectURL(audioBlob);
+      liveAudioElement.play();
+      lastAudioData = audioData;
+    });
+
+    // When the broadcast stops, continue playing the last received audio
+    liveAudioElement.addEventListener('ended', () => {
+      if (lastAudioData) {
+        const audioBlob = new Blob([lastAudioData], { type: 'audio/mpeg' });
+        liveAudioElement.src = URL.createObjectURL(audioBlob);
+        liveAudioElement.play();
+      }
+    });
+  </script>
+</body>
+</html>
